@@ -1,3 +1,8 @@
+# DEPRECATED / UNUSED
+# This file sits under `.github/workflow/` (singular) which GitHub Actions does NOT scan.
+# The active workflow lives in `.github/workflows/deploy.yml`.
+# You can delete this file (and the entire `workflow` folder) safely.
+
 name: Deploy to GitHub Pages
 
 on:
