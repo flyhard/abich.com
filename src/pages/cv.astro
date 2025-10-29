@@ -4,19 +4,14 @@ import CVHeader from '../components/CVHeader.astro';
 import CVSection from '../components/CVSection.astro';
 import CVExperienceList from '../components/CVExperienceList.astro';
 import CVSkills from '../components/CVSkills.astro';
+import { getCvVisibility } from '../lib/cvVisibility';
 
-// CV Visibility Configuration
-const cvVisibility = import.meta.env.CV_VISIBILITY || 'shareable';
-
-// Redirect to 404 if CV is hidden
-if (cvVisibility === 'hidden') {
-  return Astro.redirect('/404');
-}
-
-// Determine robots meta tag based on visibility mode
-const robotsMeta = cvVisibility === 'shareable'
-  ? 'noindex, nofollow'
-  : 'index, follow';
+// CV Visibility Configuration (validated)
+const cvVisibility = getCvVisibility(import.meta.env.CV_VISIBILITY);
+const isHidden = cvVisibility === 'hidden';
+const robotsMeta = (cvVisibility === 'shareable' || cvVisibility === 'hidden')
+    ? 'noindex, nofollow'
+    : 'index, follow';
 
 // Per Abich's actual CV data from PDF
 const personalInfo = {
@@ -158,36 +153,42 @@ const skills = [
 ];
 ---
 
-<Layout title="Per Abich - CV" robots={robotsMeta}>
-  <div class="cv-container">
-    <CVHeader
-      name={personalInfo.name}
-      title={personalInfo.title}
-      email={personalInfo.email}
-      phone={personalInfo.phone}
-      location={personalInfo.location}
-      linkedin={personalInfo.linkedin}
-      github={personalInfo.github}
-    />
-
-    <main class="cv-content">
-      <CVSection title="Arbetslivserfarenhet">
-        <CVExperienceList experiences={experiences} />
-      </CVSection>
-
-      <CVSection title="Certifieringar">
-        <CVExperienceList experiences={certifications} />
-      </CVSection>
-
-      <CVSection title="Utbildning">
-        <CVExperienceList experiences={education} />
-      </CVSection>
-
-      <CVSection title="Kompetenser">
-        <CVSkills skills={skills} />
-      </CVSection>
-    </main>
-  </div>
+<Layout title={isHidden ? '404 - CV Hidden' : 'Per Abich - CV'} robots={robotsMeta}>
+    {isHidden ? (
+			<div style="max-width:800px;margin:3rem auto;padding:2rem;font-family:Georgia,serif;line-height:1.6;">
+				<h1 style="margin-top:0;">CV Temporarily Hidden</h1>
+				<p>The CV is not publicly visible right now.</p>
+				<p>If you received this link directly, the content has been intentionally disabled until further notice.</p>
+				<p>Feel free to reach out for a current copy.</p>
+				<p style="margin-top:2rem;"><a href="/" style="color:#2c3e50;text-decoration:none;font-weight:600;">Return to homepage</a></p>
+			</div>
+    ) : (
+			<div class="cv-container">
+				<CVHeader
+						name={personalInfo.name}
+						title={personalInfo.title}
+						email={personalInfo.email}
+						phone={personalInfo.phone}
+						location={personalInfo.location}
+						linkedin={personalInfo.linkedin}
+						github={personalInfo.github}
+				/>
+				<main class="cv-content">
+					<CVSection title="Arbetslivserfarenhet">
+						<CVExperienceList experiences={experiences} />
+					</CVSection>
+					<CVSection title="Certifieringar">
+						<CVExperienceList experiences={certifications} />
+					</CVSection>
+					<CVSection title="Utbildning">
+						<CVExperienceList experiences={education} />
+					</CVSection>
+					<CVSection title="Kompetenser">
+						<CVSkills skills={skills} />
+					</CVSection>
+				</main>
+			</div>
+    )}
 </Layout>
 
 <style>

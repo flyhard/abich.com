@@ -7,15 +7,5 @@ export default defineConfig({
   // Change if different (e.g., https://username.github.io or project URL)
   site: 'https://abich.com',
 
-  // CV Visibility Configuration
-  // Access via import.meta.env.CV_VISIBILITY in components
-  // Options: 'hidden', 'shareable', 'public'
-  // Default: 'shareable'
-  vite: {
-    define: {
-      'import.meta.env.CV_VISIBILITY': JSON.stringify(
-        process.env.CV_VISIBILITY || 'shareable'
-      )
-    }
-  }
+  // CV visibility now read directly via import.meta.env.CV_VISIBILITY with fallback logic in helper.
 });
