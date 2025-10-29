@@ -1,0 +1,253 @@
+---
+export interface Props {
+  title?: string;
+}
+
+const { title = "Per Abich - Portfolio" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body>
+		<div class="page-container">
+			<div class="content-wrapper">
+				<aside class="sidebar">
+					<nav class="nav-menu">
+						<h2 class="nav-title">Per Abich</h2>
+						<ul class="nav-links">
+							<li><a href="/" class="nav-link">CV</a></li>
+							<li><a href="/shipman28" class="nav-link">Shipman 28</a></li>
+							<li><a href="/welcome" class="nav-link">Welcome</a></li>
+						</ul>
+					</nav>
+
+				</aside>
+				
+				<main class="main-content">
+					<slot />
+				</main>
+			</div>
+		</div>
+	</body>
+</html>
+
+<style>
+	html,
+	body {
+		margin: 0;
+		padding: 0;
+		width: 100%;
+		min-height: 100%;
+		font-family: 'Georgia', 'Times New Roman', serif;
+		background: #f8f9fa;
+	}
+
+	.page-container {
+		min-height: 100vh;
+		background: #f8f9fa;
+	}
+
+	.content-wrapper {
+		display: grid;
+		grid-template-columns: 280px 1fr;
+		min-height: 100vh;
+		max-width: 1400px;
+		margin: 0 auto;
+		background: white;
+		box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+	}
+
+	.sidebar {
+		background: #2c3e50;
+		color: white;
+		padding: 2rem 1.5rem;
+		border-right: 1px solid #34495e;
+	}
+
+	.nav-menu {
+		margin-bottom: 2rem;
+	}
+
+	.nav-title {
+		font-size: 1.5rem;
+		font-weight: 700;
+		margin: 0 0 1.5rem 0;
+		color: #ecf0f1;
+		border-bottom: 2px solid #34495e;
+		padding-bottom: 0.5rem;
+	}
+
+	.nav-links {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.nav-links li {
+		margin-bottom: 0.5rem;
+	}
+
+	.nav-link {
+		color: #bdc3c7;
+		text-decoration: none;
+		padding: 0.75rem 1rem;
+		display: block;
+		border-radius: 6px;
+		transition: all 0.2s ease;
+		font-weight: 500;
+	}
+
+	.nav-link:hover {
+		background: #34495e;
+		color: #ecf0f1;
+		transform: translateX(4px);
+	}
+
+	.toc-container {
+		border-top: 1px solid #34495e;
+		padding-top: 1.5rem;
+	}
+
+	.toc-title {
+		font-size: 1.1rem;
+		font-weight: 600;
+		margin: 0 0 1rem 0;
+		color: #ecf0f1;
+	}
+
+	.toc-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.toc-list li {
+		margin-bottom: 0.25rem;
+	}
+
+	.toc-link {
+		color: #95a5a6;
+		text-decoration: none;
+		padding: 0.25rem 0.5rem;
+		display: block;
+		font-size: 0.9rem;
+		border-radius: 3px;
+		transition: all 0.2s ease;
+		line-height: 1.4;
+	}
+
+	.toc-link:hover {
+		background: #34495e;
+		color: #ecf0f1;
+	}
+
+	.toc-h1 {
+		font-weight: 600;
+		margin-left: 0;
+	}
+
+	.toc-h2 {
+		margin-left: 1rem;
+	}
+
+	.toc-h3 {
+		margin-left: 2rem;
+		font-size: 0.85rem;
+	}
+
+	.toc-h4 {
+		margin-left: 3rem;
+		font-size: 0.8rem;
+	}
+
+	.no-toc {
+		color: #7f8c8d;
+		font-style: italic;
+		margin: 0;
+		font-size: 0.9rem;
+	}
+
+	.main-content {
+		padding: 2rem;
+		background: white;
+		overflow-x: auto;
+	}
+
+	@media (max-width: 768px) {
+		.content-wrapper {
+			grid-template-columns: 1fr;
+			grid-template-rows: auto 1fr;
+		}
+
+		.sidebar {
+			padding: 1rem;
+		}
+
+		.nav-title {
+			font-size: 1.3rem;
+		}
+
+		.toc-container {
+			display: none;
+		}
+
+		.main-content {
+			padding: 1rem;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.nav-links {
+			display: flex;
+			gap: 0.5rem;
+			overflow-x: auto;
+		}
+
+		.nav-links li {
+			margin-bottom: 0;
+			flex-shrink: 0;
+		}
+
+		.nav-link {
+			padding: 0.5rem 0.75rem;
+			white-space: nowrap;
+		}
+	}
+
+	/* Smooth scrolling for TOC links */
+	html {
+		scroll-behavior: smooth;
+	}
+
+	/* Highlight targeted headings */
+	:target {
+		scroll-margin-top: 2rem;
+		animation: highlight 2s ease-in-out;
+	}
+
+	@keyframes highlight {
+		0% { background-color: #fff3cd; }
+		100% { background-color: transparent; }
+	}
+
+	@media print {
+		.sidebar {
+			display: none;
+		}
+
+		.content-wrapper {
+			grid-template-columns: 1fr;
+		}
+
+		.main-content {
+			padding: 1rem;
+		}
+	}
+</style>

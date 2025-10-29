@@ -1,0 +1,41 @@
+---
+export interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<section class="cv-section">
+  <h2 class="section-title">{title}</h2>
+  <div class="section-content">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .cv-section {
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0 0 1.5rem 0;
+    color: #2c3e50;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #bdc3c7;
+    padding-bottom: 0.5rem;
+  }
+
+  .section-content {
+    margin-left: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .section-content {
+      margin-left: 0;
+    }
+  }
+</style>

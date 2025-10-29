@@ -1,0 +1,39 @@
+---
+import CVExperience from './CVExperience.astro';
+
+export interface ExperienceItem {
+  startDate: string;
+  endDate?: string | null;
+  company: string;
+  role: string;
+  location?: string;
+  description: string;
+}
+
+export interface Props {
+  experiences: ExperienceItem[];
+}
+
+const { experiences } = Astro.props;
+---
+
+<div class="experience-list">
+  {experiences.map((exp) => (
+    <CVExperience
+      startDate={exp.startDate}
+      endDate={exp.endDate || undefined}
+      company={exp.company}
+      role={exp.role}
+      location={exp.location}
+      description={exp.description}
+    />
+  ))}
+</div>
+
+<style>
+  .experience-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+</style>
