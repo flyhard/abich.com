@@ -5,6 +5,19 @@ import CVSection from '../components/CVSection.astro';
 import CVExperienceList from '../components/CVExperienceList.astro';
 import CVSkills from '../components/CVSkills.astro';
 
+// CV Visibility Configuration
+const cvVisibility = import.meta.env.CV_VISIBILITY || 'shareable';
+
+// Redirect to 404 if CV is hidden
+if (cvVisibility === 'hidden') {
+  return Astro.redirect('/404');
+}
+
+// Determine robots meta tag based on visibility mode
+const robotsMeta = cvVisibility === 'shareable'
+  ? 'noindex, nofollow'
+  : 'index, follow';
+
 // Per Abich's actual CV data from PDF
 const personalInfo = {
   name: "Per Abich",
@@ -145,7 +158,7 @@ const skills = [
 ];
 ---
 
-<Layout>
+<Layout title="Per Abich - CV" robots={robotsMeta}>
   <div class="cv-container">
     <CVHeader
       name={personalInfo.name}

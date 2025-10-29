@@ -4,6 +4,10 @@ export interface Props {
 }
 
 const { title = "Per Abich - Portfolio" } = Astro.props;
+
+// CV Visibility Configuration
+const cvVisibility = import.meta.env.CV_VISIBILITY || 'shareable';
+const showCvLink = cvVisibility === 'public';
 ---
 
 <!doctype html>
@@ -22,7 +26,7 @@ const { title = "Per Abich - Portfolio" } = Astro.props;
 					<nav class="nav-menu">
 						<h2 class="nav-title">Per Abich</h2>
 						<ul class="nav-links">
-							<li><a href="/" class="nav-link">CV</a></li>
+							{showCvLink && <li><a href="/" class="nav-link">CV</a></li>}
 							<li><a href="/shipman28" class="nav-link">Shipman 28</a></li>
 							<li><a href="/welcome" class="nav-link">Welcome</a></li>
 						</ul>

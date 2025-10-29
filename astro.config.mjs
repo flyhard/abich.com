@@ -5,5 +5,17 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
   // Assumption: This site will live at https://abich.com (custom domain configured in GitHub Pages)
   // Change if different (e.g., https://username.github.io or project URL)
-  site: 'https://abich.com'
+  site: 'https://abich.com',
+
+  // CV Visibility Configuration
+  // Access via import.meta.env.CV_VISIBILITY in components
+  // Options: 'hidden', 'shareable', 'public'
+  // Default: 'shareable'
+  vite: {
+    define: {
+      'import.meta.env.CV_VISIBILITY': JSON.stringify(
+        process.env.CV_VISIBILITY || 'shareable'
+      )
+    }
+  }
 });

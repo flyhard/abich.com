@@ -1,3 +1,12 @@
+---
+export interface Props {
+	title?: string;
+	robots?: string;
+}
+
+const { title = "Astro Basics", robots } = Astro.props;
+---
+
 <!doctype html>
 <html lang="en">
 	<head>
@@ -5,7 +14,8 @@
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
+		{robots && <meta name="robots" content={robots} />}
+		<title>{title}</title>
 	</head>
 	<body>
 		<slot />
