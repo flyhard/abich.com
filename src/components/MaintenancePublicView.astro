@@ -1,0 +1,17 @@
+---
+import MaintenanceStatusSummary from './MaintenanceStatusSummary.astro';
+import MaintenanceSeasonChecklist from './MaintenanceSeasonChecklist.astro';
+import MaintenanceTaskList from './MaintenanceTaskList.astro';
+const { season = 'winterize' } = Astro.props;
+---
+<div class="maintenance-public-view">
+  <MaintenanceStatusSummary season={season} scope="public" />
+  <MaintenanceSeasonChecklist season={season} scope="public" />
+  <MaintenanceTaskList season={season} scope="public" />
+  <p class="privacy-note">Showing only public tasks. Internal notes and buyer/private tasks are excluded.</p>
+</div>
+<style>
+  .maintenance-public-view { margin:1rem 0; }
+  .privacy-note { font-size:0.6rem; color:#666; margin-top:0.5rem; }
+</style>
+

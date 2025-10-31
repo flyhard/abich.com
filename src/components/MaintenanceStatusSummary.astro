@@ -1,0 +1,16 @@
+---
+import { getSeasonChecklist, computeStatusSummary } from '../lib/maintenance.ts';
+const { season = 'winterize', scope = 'owner' } = Astro.props;
+const checklist = getSeasonChecklist(season, new Date(), scope);
+const summary = computeStatusSummary(checklist);
+---
+<div class="maintenance-status-summary">
+  <span class="percent">{summary.percent}%</span>
+  <span class="detail">{summary.completed}/{summary.total} completed</span>
+  <span class="overdue">{summary.overdue} overdue</span>
+</div>
+<style>
+  .maintenance-status-summary { display:flex; gap:0.75rem; font-size:0.75rem; align-items:center; background:#f5f5f5; padding:0.4rem 0.6rem; border-radius:6px; }
+  .maintenance-status-summary .percent { font-weight:600; }
+  .maintenance-status-summary .overdue { color:#e74c3c; }
+</style>

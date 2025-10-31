@@ -38,6 +38,13 @@ The site is hosted on GitHub Pages with a custom domain (abich.com).
 ### Testing Strategy
 Currently no automated testing framework configured. Manual testing for static site generation.
 
+### Quality & Validation
+To maintain consistently high code quality:
+- Always run `npx astro check` locally before marking any OpenSpec task complete or merging changes.
+- Treat a clean `astro check` (no errors) as a required quality gate alongside a successful `npm run build`.
+- Add new components only after verifying type safety and accessibility warnings via `astro check`.
+- CI should be updated (future task) to fail the build if `astro check` reports errors.
+
 ### Git Workflow
 - Main branch: `main`
 - Deployed automatically via GitHub Actions to GitHub Pages
@@ -57,4 +64,3 @@ Personal website for professional portfolio and CV presentation. Focus on clean,
 - GitHub Pages for hosting
 - GitHub Actions for CI/CD deployment
 - Astro build toolchain
-

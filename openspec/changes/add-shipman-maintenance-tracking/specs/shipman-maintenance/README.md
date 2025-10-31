@@ -42,10 +42,19 @@ Provide a normalized catalog of maintenance tasks enabling:
 - `nextDue` computed by helper based on `lastPerformed` + `frequency`.
 - `overdue` boolean derived when `Date.now() > nextDue` and `status != completed`.
 
-## Privacy Rules
-- `public`: Visible in all views and exports.
-- `buyer`: Visible only in buyer + owner scope; excluded from public.
-- `private`: Visible only to owner scope; excluded from buyer + public.
+## Privacy Rules (Expanded)
+Visibility Matrix:
+- Owner scope: all tasks, full history notes, blocked reasons.
+- Buyer scope: public + buyer tasks; history notes included; blocked reasons redacted to generic label.
+- Public scope: only public tasks; history notes removed; blocked reasons removed.
+
+Redaction Behavior:
+- `exportTasks('buyer')` -> retains notes but sets blocked reason to `redacted`.
+- `exportTasks('public')` -> strips notes and blocked reason fields entirely.
+- Components (`MaintenancePublicView`, `MaintenanceBuyerView`) rely on scope prop to select tasks and render allowed data only.
+
+Ephemeral Interaction:
+- Client-side task actions (complete/block/unblock) do not persist; privacy logic would apply to future persisted implementation.
 
 ## Seasonal Checklists
 - Winterization: tasks tagged `winterize`.
@@ -69,3 +78,95 @@ Function `exportTasks(scope)` returns array with:
 - Do we track cost per task occurrence? (Future enhancement)
 - User authentication (current site static?)—owner vs public segmentation method.
 
+## Agent Mapping & Export Schema
+
+Export function `exportTasks(scope)` returns:
+```json
+{
+  "generatedAt": "2025-10-30T22:40:00.000Z",
+  "scope": "public",
+  "tasks": [
+    {
+      "id": "engine-oil-change",
+      "title": "Change engine oil",
+      "status": "pending",
+      "nextDue": "2025-12-14",
+      "overdue": false,
+      "daysUntilDue": 45,
+      "systemTags": ["engine"],
+      "seasonTags": ["commission"],
+      "privacy": "public"
+    }
+  ]
+}
+```
+Notes:
+- `history` entries redacted (notes removed) for `public` scope.
+- Buyer scope retains notes but redacts blocked reasons.
+
+### Suggested Tasks Helper
+`suggestUpcomingTasks(new Date(), 'owner', 5)` returns ordered tasks: overdue first, then soonest due, then seasonal upcoming.
+
+```js
+import { suggestUpcomingTasks } from '@/src/lib/maintenance';
+const upcoming = suggestUpcomingTasks(new Date(), 'owner', 5);
+```
+
+### Status Summary Example
+```js
+import { getSeasonChecklist, computeStatusSummary } from '@/src/lib/maintenance';
+const list = getSeasonChecklist('winterize');
+const summary = computeStatusSummary(list);
+// summary => { total: 6, completed: 0, percent: 0, overdue: 0 }
+```
+
+## Usage Examples
+
+### Load Winterize Checklist
+```js
+import { getSeasonChecklist } from '@/src/lib/maintenance.js';
+const winterList = getSeasonChecklist('winterize');
+```
+
+### Export Buyer Scope
+```js
+import { exportTasks } from '@/src/lib/maintenance.js';
+const buyerData = exportTasks('buyer');
+```
+
+### Suggest Upcoming Tasks
+```js
+import { suggestUpcomingTasks } from '@/src/lib/maintenance.js';
+const upcoming = suggestUpcomingTasks(new Date(), 'owner', 7);
+```
+
+## JSON Schema (Simplified)
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MaintenanceTask",
+  "type": "object",
+  "required": ["id", "title", "systemTags", "seasonTags", "status", "privacy", "history"],
+  "properties": {
+    "id": {"type": "string"},
+    "title": {"type": "string"},
+    "description": {"type": "string"},
+    "systemTags": {"type": "array", "items": {"type": "string"}},
+    "seasonTags": {"type": "array", "items": {"type": "string"}},
+    "frequency": {
+      "oneOf": [
+        {"type": "object", "required": ["type", "intervalDays"], "properties": {"type": {"const": "interval"}, "intervalDays": {"type": "number", "minimum": 1}}},
+        {"type": "object", "required": ["type", "season"], "properties": {"type": {"const": "seasonal"}, "season": {"enum": ["winterize", "commission"]}}},
+        {"type": "object", "required": ["type", "condition"], "properties": {"type": {"const": "conditional"}, "condition": {"type": "string"}}}
+      ]
+    },
+    "status": {"enum": ["pending", "in-progress", "completed", "blocked"]},
+    "lastPerformed": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+    "materials": {"type": "array", "items": {"type": "object", "required": ["name"], "properties": {"name": {"type": "string"}, "quantity": {"type": "number"}, "unit": {"type": "string"}, "notes": {"type": "string"}}}},
+    "dependencies": {"type": "array", "items": {"type": "string"}},
+    "estimatedDurationMinutes": {"type": "number"},
+    "privacy": {"enum": ["public", "buyer", "private"]},
+    "history": {"type": "array", "items": {"type": "object", "required": ["date", "action"], "properties": {"date": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"}, "action": {"enum": ["completed", "blocked", "unblocked"]}, "notes": {"type": "string"}, "reason": {"type": "string"}}}}
+  }
+}
+```

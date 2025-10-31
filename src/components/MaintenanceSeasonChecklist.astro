@@ -1,0 +1,81 @@
+---
+import { getSeasonChecklist, computeStatusSummary } from '../lib/maintenance.ts';
+const { season = 'winterize', scope = 'owner' } = Astro.props;
+const checklist = getSeasonChecklist(season, new Date(), scope);
+const summary = computeStatusSummary(checklist);
+interface ChecklistTask { id: string; title: string; status: string; overdue: boolean; nextDue?: string; systemTags: string[]; seasonTags: string[]; }
+---
+<section class="maintenance-season" data-season={season} aria-labelledby="season-title" aria-describedby="season-progress">
+  <header>
+    <h2 id="season-title">{season === 'winterize' ? 'Winterization Checklist' : 'Commissioning Checklist'}</h2>
+    <div id="season-progress" class="summary" role="status" aria-live="polite">
+      <strong>{summary.percent}%</strong> complete · {summary.completed}/{summary.total} tasks · {summary.overdue} overdue
+    </div>
+    <div class="progress-bar" role="progressbar" aria-valuenow={summary.percent} aria-valuemin="0" aria-valuemax="100" aria-label="Checklist completion">
+      <div class="progress-fill" style={`width:${summary.percent}%`}></div>
+    </div>
+    <button type="button" class="complete-all-btn" aria-label="Mark all visible tasks completed">Complete All (Ephemeral)</button>
+  </header>
+  <ul class="tasks" role="list">
+    {checklist.map((t: ChecklistTask) => (
+      <li class={`task ${t.status} ${t.overdue ? 'overdue' : ''}`} data-task-id={t.id} data-deps={(t as any).dependencies ? (t as any).dependencies.join(',') : ''}>
+        <div class="title">{t.title}</div>
+        {t.nextDue && <div class="next-due">Next Due: {t.nextDue}{t.overdue && ' (OVERDUE)'} </div>}
+        <div class="meta">
+          <span class="tags" aria-label="System tags">{t.systemTags.join(', ')}</span>
+          {t.seasonTags.length > 0 && <span class="season" aria-label="Season tags">Season: {t.seasonTags.join(', ')}</span>}
+        </div>
+      </li>
+    ))}
+  </ul>
+</section>
+<script>
+  (() => {
+    const scriptEl = document.currentScript;
+    const rootEl = scriptEl?.closest('.maintenance-season');
+    if (!rootEl) return; // Narrowing guard
+    const el = rootEl; // Non-null asserted local
+    const btn = el.querySelector<HTMLButtonElement>('.complete-all-btn');
+    const summaryEl = el.querySelector<HTMLDivElement>('#season-progress');
+    const progressFill = el.querySelector<HTMLDivElement>('.progress-fill');
+    function recomputeProgress() {
+      const total = el.querySelectorAll('.task').length;
+      const completed = el.querySelectorAll('.task.completed').length;
+      const overdueCount = el.querySelectorAll('.task.overdue').length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      if (summaryEl) summaryEl.textContent = `${percent}% complete · ${completed}/${total} tasks · ${overdueCount} overdue`;
+      if (progressFill) progressFill.style.width = percent + '%';
+      const bar = el.querySelector('.progress-bar');
+      if (bar) bar.setAttribute('aria-valuenow', String(percent));
+    }
+    btn?.addEventListener('click', () => {
+      if (!confirm('Mark all listed tasks as completed? This is not persisted.')) return;
+      const tasksWithDeps = Array.from(el.querySelectorAll('.task[data-deps]')).filter(node => node.getAttribute('data-deps'));
+      if (tasksWithDeps.length) {
+        if (!confirm('Some tasks have dependencies. Proceed marking all completed?')) return;
+      }
+      el.querySelectorAll('.task.pending, .task.in-progress').forEach(li => {
+        li.classList.remove('pending','in-progress');
+        li.classList.add('completed');
+        const nextDue = li.querySelector('.next-due');
+        if (nextDue) nextDue.textContent = 'Completed';
+      });
+      recomputeProgress();
+    });
+  })();
+</script>
+<style>
+  .maintenance-season { margin: 2rem 0; }
+  .maintenance-season header { display:flex; align-items: flex-start; gap:1rem; flex-wrap:wrap; }
+  .maintenance-season .summary { font-size:0.85rem; color:#555; flex:1 1 100%; }
+  .progress-bar { position:relative; width:180px; height:8px; background:#eee; border-radius:4px; overflow:hidden; }
+  .progress-fill { position:absolute; top:0; left:0; height:100%; background:#4caf50; transition:width 0.3s ease; }
+  .tasks { list-style:none; margin:1rem 0 0; padding:0; }
+  .task { padding:0.75rem 1rem; border:1px solid #ddd; border-radius:6px; margin-bottom:0.5rem; background:#fafafa; }
+  .task.overdue { border-color:#e74c3c; background:#fff5f5; }
+  .task .title { font-weight:600; }
+  .next-due { font-size:0.75rem; color:#555; }
+  .meta { font-size:0.65rem; color:#666; margin-top:0.25rem; }
+  .complete-all-btn { font-size:0.65rem; background:#eee; border:1px solid #ccc; padding:0.35rem 0.6rem; border-radius:4px; cursor:pointer; }
+  .complete-all-btn:hover { background:#e0e0e0; }
+</style>

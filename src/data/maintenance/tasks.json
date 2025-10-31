@@ -1,0 +1,133 @@
+[
+  {
+    "id": "engine-oil-change",
+    "title": "Change engine oil",
+    "description": "Replace engine oil and filter.",
+    "systemTags": ["engine"],
+    "seasonTags": ["commission"],
+    "frequency": { "type": "interval", "intervalDays": 90 },
+    "status": "pending",
+    "lastPerformed": "2025-09-15",
+    "materials": [ { "name": "Oil 10W-40", "quantity": 3, "unit": "L" }, { "name": "Oil filter" } ],
+    "dependencies": ["engine-warm-up"],
+    "estimatedDurationMinutes": 45,
+    "privacy": "public",
+    "history": [
+      { "date": "2025-06-10", "action": "completed", "notes": "Normal wear" },
+      { "date": "2025-09-15", "action": "completed", "notes": "Oil darker than expected" }
+    ]
+  },
+  {
+    "id": "rigging-inspection",
+    "title": "Inspect standing rigging",
+    "description": "Visual inspection of shrouds, stays, turnbuckles, and terminals.",
+    "systemTags": ["rigging"],
+    "seasonTags": ["commission", "winterize"],
+    "frequency": { "type": "interval", "intervalDays": 180 },
+    "status": "pending",
+    "lastPerformed": "2025-08-01",
+    "privacy": "buyer",
+    "history": [ { "date": "2025-08-01", "action": "completed", "notes": "No corrosion" } ]
+  },
+  {
+    "id": "hull-cleaning",
+    "title": "Clean hull and inspect for osmosis",
+    "systemTags": ["hull"],
+    "seasonTags": ["winterize"],
+    "frequency": { "type": "seasonal", "season": "winterize" },
+    "status": "pending",
+    "privacy": "public",
+    "history": []
+  },
+  {
+    "id": "battery-check",
+    "title": "Check battery voltage and terminals",
+    "systemTags": ["electrical"],
+    "seasonTags": ["commission", "winterize"],
+    "frequency": { "type": "interval", "intervalDays": 60 },
+    "status": "pending",
+    "lastPerformed": "2025-09-20",
+    "privacy": "public",
+    "history": [ { "date": "2025-09-20", "action": "completed", "notes": "Voltage 12.6V" } ]
+  },
+  {
+    "id": "winterize-engine",
+    "title": "Winterize engine",
+    "systemTags": ["engine"],
+    "seasonTags": ["winterize"],
+    "frequency": { "type": "seasonal", "season": "winterize" },
+    "status": "pending",
+    "dependencies": ["engine-oil-change"],
+    "privacy": "private",
+    "history": []
+  },
+  {
+    "id": "commission-engine",
+    "title": "Commission engine (spring)",
+    "systemTags": ["engine"],
+    "seasonTags": ["commission"],
+    "frequency": { "type": "seasonal", "season": "commission" },
+    "status": "pending",
+    "privacy": "public",
+    "history": []
+  },
+  {
+    "id": "safety-flare-check",
+    "title": "Check and log flare expiration dates",
+    "systemTags": ["safety"],
+    "seasonTags": ["commission"],
+    "frequency": { "type": "interval", "intervalDays": 365 },
+    "status": "pending",
+    "estimatedDurationMinutes": 10,
+    "materials": [],
+    "privacy": "public",
+    "history": []
+  },
+  {
+    "id": "engine-fuel-filter-replace",
+    "title": "Replace primary fuel filter",
+    "systemTags": ["engine"],
+    "seasonTags": ["commission"],
+    "frequency": { "type": "interval", "intervalDays": 180 },
+    "status": "pending",
+    "estimatedDurationMinutes": 25,
+    "materials": [{ "name": "Fuel filter" }],
+    "privacy": "buyer",
+    "history": []
+  },
+  {
+    "id": "electrical-nav-light-test",
+    "title": "Test navigation lights",
+    "systemTags": ["electrical"],
+    "seasonTags": ["commission", "winterize"],
+    "frequency": { "type": "interval", "intervalDays": 30 },
+    "status": "pending",
+    "estimatedDurationMinutes": 15,
+    "privacy": "public",
+    "history": []
+  },
+  {
+    "id": "rigging-turnbuckle-lube",
+    "title": "Lubricate turnbuckles",
+    "systemTags": ["rigging"],
+    "seasonTags": ["commission"],
+    "frequency": { "type": "interval", "intervalDays": 365 },
+    "status": "pending",
+    "estimatedDurationMinutes": 20,
+    "materials": [{ "name": "Marine lubricant" }],
+    "privacy": "public",
+    "history": []
+  },
+  {
+    "id": "hull-anode-inspection",
+    "title": "Inspect and replace shaft anode if >50% depleted",
+    "systemTags": ["hull"],
+    "seasonTags": ["commission", "winterize"],
+    "frequency": { "type": "interval", "intervalDays": 120 },
+    "status": "pending",
+    "estimatedDurationMinutes": 30,
+    "materials": [{ "name": "Shaft anode" }],
+    "privacy": "public",
+    "history": []
+  }
+]

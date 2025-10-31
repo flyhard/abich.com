@@ -1,5 +1,8 @@
 ---
 import SidebarLayout from '../layouts/SidebarLayout.astro';
+import MaintenanceSeasonChecklist from '../components/MaintenanceSeasonChecklist.astro';
+import MaintenanceTaskList from '../components/MaintenanceTaskList.astro';
+import MaintenanceStatusSummary from '../components/MaintenanceStatusSummary.astro';
 ---
 
 <SidebarLayout title="Per Abich - Shipman 28">
@@ -134,6 +137,9 @@ import SidebarLayout from '../layouts/SidebarLayout.astro';
         <li>Rigging inspection and replacement</li>
         <li>Hull osmosis prevention and treatment</li>
       </ul>
+      <MaintenanceStatusSummary season="winterize" scope="public" />
+      <MaintenanceSeasonChecklist season="winterize" scope="public" />
+      <MaintenanceTaskList scope="public" season="winterize" />
     </section>
   </div>
 </SidebarLayout>

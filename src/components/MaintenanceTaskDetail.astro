@@ -1,0 +1,126 @@
+---
+import { loadTasks, decorateTasks } from '../lib/maintenance.ts';
+import { appendHistory } from '../lib/maintenance.ts';
+interface TaskDetailProps { id?: string; scope?: 'owner' | 'buyer' | 'public'; }
+const { id, scope = 'owner' }: TaskDetailProps = Astro.props;
+const allTasks = decorateTasks(loadTasks(), new Date());
+const task = id ? allTasks.find(t => t.id === id) : undefined;
+const scopeVal = scope;
+---
+{task ? (
+  <article class="task-detail" data-task-id={task.id} aria-labelledby={`task-${task.id}-title`} data-deps={task.dependencies ? task.dependencies.join(',') : ''}>
+    <header>
+      <h3 id={`task-${task.id}-title`}>{task.title}</h3>
+      {task.nextDue && <div class="next">Next Due: {task.nextDue}{task.overdue && ' (OVERDUE)'} </div>}
+    </header>
+    {task.description && <p class="desc">{task.description}</p>}
+    <div class="meta" aria-label="Task metadata">
+      <div><strong>Status:</strong> <span class="status-value" data-status={task.status}>{task.status}</span></div>
+      <div><strong>System Tags:</strong> {task.systemTags.join(', ')}</div>
+      <div><strong>Season Tags:</strong> {task.seasonTags.join(', ')}</div>
+      {task.frequency && <div><strong>Frequency:</strong> {task.frequency.type}</div>}
+    </div>
+    <section class="history" aria-label="History">
+      <h4>History</h4>
+      <ul class="history-list">
+        {[...task.history].reverse().map(h => (
+          <li>{h.date}: {h.action}{(scopeVal === 'owner' || scopeVal === 'buyer') && h.notes ? ' - ' + h.notes : ''}</li>
+        ))}
+      </ul>
+    </section>
+    <section class="task-actions" aria-label="Ephemeral actions">
+      <h4>Record Task (Ephemeral)</h4>
+      <form class="perform-task-form" aria-label="Mark task completed">
+        <label>Date <input name="date" type="date" value={new Date().toISOString().substring(0,10)} /></label>
+        <label>Notes <input name="notes" type="text" placeholder="Work notes" /></label>
+        <button type="submit" aria-label="Mark task completed">Mark Completed</button>
+      </form>
+      <div class="block-actions" aria-label="Block/unblock actions">
+        <button type="button" class="block-btn" aria-label="Block task">Block</button>
+        <button type="button" class="unblock-btn" aria-label="Unblock task">Unblock</button>
+      </div>
+      <p class="ephemeral-note">Changes are local only (static site prototype).</p>
+    </section>
+    <script>
+      const root = document.currentScript?.closest('.task-detail');
+      if (!root) return;
+      const historyList = root.querySelector('.history-list');
+      const statusSpan = root.querySelector('.status-value');
+      const form = root.querySelector('.perform-task-form');
+
+      function prependHistory(text: string) { // typed
+        if (!historyList) return;
+        const li = document.createElement('li');
+        li.textContent = text;
+        historyList.prepend(li);
+      }
+
+      form?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        // Blocked transition constraint
+        if (statusSpan && statusSpan.textContent === 'blocked') {
+          alert('Task is blocked. Unblock before marking completed.');
+          return;
+        }
+        // Dependency check: if dependencies exist and any not completed, prompt
+        const depsAttr = root.getAttribute('data-deps');
+        if (depsAttr) {
+          const deps = depsAttr.split(',').filter(Boolean);
+          const incompleteDeps = deps.filter(d => !document.querySelector(`.task-detail[data-task-id="${d}"] .status-value, .task[data-task-id="${d}"]`));
+          // Fallback: treat absence as incomplete; if any deps, ask user
+          if (deps.length && incompleteDeps.length) {
+            if (!confirm('Dependencies not confirmed complete. Proceed anyway?')) {
+              return;
+            }
+          }
+        }
+        const dateInput = form.querySelector('input[name="date"]') as HTMLInputElement | null;
+        const notesInput = form.querySelector('input[name="notes"]') as HTMLInputElement | null;
+        const date = dateInput?.value || new Date().toISOString().substring(0,10);
+        const notes = notesInput?.value ? notesInput.value.trim() : '';
+        prependHistory(date + ': completed' + (notes ? ' - ' + notes : ''));
+        if (statusSpan) statusSpan.textContent = 'completed';
+        if (notesInput) notesInput.value = '';
+        // Invoke library history append (non-persistent)
+        appendHistory(root.getAttribute('data-task-id') || '', { date, action: 'completed', notes });
+      });
+
+      const blockBtn = root.querySelector('.block-btn');
+      const unblockBtn = root.querySelector('.unblock-btn');
+
+      blockBtn?.addEventListener('click', () => {
+        const reason = window.prompt('Reason for blocking?');
+        if (!reason) return;
+        prependHistory(new Date().toISOString().substring(0,10) + ': blocked' + (reason ? ' - ' + reason : ''));
+        if (statusSpan) statusSpan.textContent = 'blocked';
+        // Invoke library history append (non-persistent)
+        appendHistory(root.getAttribute('data-task-id') || '', { date: new Date().toISOString().substring(0,10), action: 'blocked', reason });
+      });
+
+      unblockBtn?.addEventListener('click', () => {
+        prependHistory(new Date().toISOString().substring(0,10) + ': unblocked');
+        if (statusSpan) statusSpan.textContent = 'pending';
+        // Invoke library history append (non-persistent)
+        appendHistory(root.getAttribute('data-task-id') || '', { date: new Date().toISOString().substring(0,10), action: 'unblocked' });
+      });
+    </script>
+  </article>
+) : (
+  <p class="task-missing">Task not found.</p>
+)}
+<style>
+  .task-detail { border:1px solid #ddd; padding:1rem; border-radius:8px; background:#fafafa; }
+  .task-detail header { display:flex; flex-direction:column; gap:0.25rem; }
+  .task-detail .next { font-size:0.8rem; color:#555; }
+  .task-detail .meta { font-size:0.75rem; display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:0.5rem; margin:0.5rem 0 1rem; }
+  .task-detail .history ul { list-style:none; padding:0; margin:0; }
+  .task-detail .history li { font-size:0.7rem; border-bottom:1px solid #eee; padding:0.25rem 0; }
+  .task-actions { border-top:1px solid #ddd; margin-top:1rem; padding-top:0.75rem; }
+  .perform-task-form { display:flex; flex-wrap:wrap; gap:0.5rem; font-size:0.7rem; }
+  .perform-task-form label { display:flex; flex-direction:column; }
+  .perform-task-form button { font-size:0.7rem; }
+  .block-actions { display:flex; gap:0.5rem; margin-top:0.5rem; }
+  .block-actions button { font-size:0.65rem; }
+  .ephemeral-note { font-size:0.6rem; color:#666; }
+  .task-missing { font-size:0.8rem; color:#c00; }
+</style>

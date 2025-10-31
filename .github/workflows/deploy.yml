@@ -30,6 +30,8 @@ jobs:
           # Prefer current LTS for stability; change if you intentionally target 24
           node-version: 20
           # (Optional) If you later add a custom working directory, set path: .
+        env:
+          CV_VISIBILITY: shareable
 
   deploy:
     if: github.event_name != 'pull_request'

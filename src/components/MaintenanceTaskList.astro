@@ -1,0 +1,32 @@
+---
+import { loadTasks, decorateTasks, filterTasksByScope } from '../lib/maintenance.ts';
+const { scope = 'owner', tag, season, status } = Astro.props;
+let tasks = filterTasksByScope(loadTasks(), scope);
+if (tag) tasks = tasks.filter((t: any) => t.systemTags.includes(tag));
+if (season) tasks = tasks.filter((t: any) => t.seasonTags.includes(season));
+if (status) tasks = tasks.filter((t: any) => t.status === status);
+const decorated = decorateTasks(tasks, new Date());
+---
+<section class="maintenance-task-list">
+  <header><h2>Maintenance Tasks</h2></header>
+  <ul>
+    {decorated.map((t: any) => (
+      <li class={`task ${t.status} ${t.overdue ? 'overdue' : ''}`}>
+        <div class="row">
+          <span class="title">{t.title}</span>
+          {t.nextDue && <span class="due">{t.overdue ? 'OVERDUE' : 'Due'}: {t.nextDue}</span>}
+        </div>
+        <div class="tags">{t.systemTags.join(', ')}{t.seasonTags.length ? ' · ' + t.seasonTags.join(', ') : ''}</div>
+      </li>
+    ))}
+  </ul>
+</section>
+<style>
+  .maintenance-task-list ul { list-style:none; padding:0; margin:0; }
+  .maintenance-task-list li { padding:0.5rem 0.75rem; border-bottom:1px solid #eee; }
+  .maintenance-task-list li.overdue { background:#fff5f5; }
+  .row { display:flex; justify-content:space-between; align-items:center; }
+  .title { font-weight:600; }
+  .due { font-size:0.75rem; color:#444; }
+  .tags { font-size:0.65rem; color:#666; }
+</style>

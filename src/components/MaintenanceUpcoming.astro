@@ -1,0 +1,19 @@
+---
+import { suggestUpcomingTasks } from '../lib/maintenance.ts';
+const { scope = 'public', max = 5 } = Astro.props;
+const upcoming = suggestUpcomingTasks(new Date(), scope, max);
+---
+<section class="maintenance-upcoming" aria-labelledby="upcoming-title">
+  <h3 id="upcoming-title">Upcoming Tasks</h3>
+  <ul>
+    {upcoming.map(t => (
+      <li class={`item ${t.overdue ? 'overdue' : ''}`}>{t.title} · {t.nextDue || 'n/a'} {t.overdue && '(OVERDUE)'}</li>
+    ))}
+  </ul>
+</section>
+<style>
+  .maintenance-upcoming ul { list-style:none; padding:0; margin:0; }
+  .maintenance-upcoming li { font-size:0.65rem; padding:0.25rem 0; }
+  .maintenance-upcoming li.overdue { color:#c0392b; font-weight:600; }
+</style>
+
